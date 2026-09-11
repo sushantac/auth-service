@@ -4,6 +4,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.integration.spring.SpringLiquibase;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -11,6 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import javax.sql.DataSource;
 
 @Configuration
+@EnableConfigurationProperties(LiquibaseProperties.class)
 public class LiquibaseConfig {
 
     @Value("${spring.liquibase.default-schema:auth}")
@@ -25,7 +27,7 @@ public class LiquibaseConfig {
                     org.springframework.jdbc.core.JdbcTemplate jdbcTemplate = new org.springframework.jdbc.core.JdbcTemplate(dataSource);
                     jdbcTemplate.execute("CREATE SCHEMA IF NOT EXISTS " + schema);
                     super.afterPropertiesSet();
-                } catch (LiquibaseException e) {
+                } catch (liquibase.exception.LiquibaseException e) {
                     throw new IllegalStateException("Failed to initialize Liquibase", e);
                 }
             }

@@ -19,16 +19,15 @@ public class LiquibaseConfig {
         SpringLiquibase liquibase = new SpringLiquibase() {
             @Override
             public void afterPropertiesSet() {
-                // Create schema before Liquibase initializes
                 org.springframework.jdbc.core.JdbcTemplate jdbcTemplate = new org.springframework.jdbc.core.JdbcTemplate(dataSource);
-                jdbcTemplate.execute("CREATE SCHEMA IF NOT EXISTS " + schema);
+                jdbcTemplate.execute("CREATE auth IF NOT EXISTS " + schema);
                 super.afterPropertiesSet();
             }
         };
         liquibase.setDataSource(dataSource);
         liquibase.setChangeLog(properties.getChangeLog());
         liquibase.setDefaultSchema(schema);
-        liquibase.setContexts(properties.getContexts());
+        liquibase.setContexts(properties.getContexts() != null ? String.join(",", properties.getContexts()) : "");
         liquibase.setDropFirst(properties.isDropFirst());
         return liquibase;
     }

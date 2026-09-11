@@ -46,13 +46,12 @@ spring:
     virtual:
       enabled: true
 
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+
 server:
   port: 8081
   shutdown: graceful
-
-spring:
-  lifecycle:
-    timeout-per-shutdown-phase: 20s
 
 management:
   endpoints:

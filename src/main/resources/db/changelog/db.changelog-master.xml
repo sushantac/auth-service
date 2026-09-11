@@ -5,6 +5,10 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
             https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
+    <changeSet id="00_create_schema" author="sushant">
+        <sql>CREATE SCHEMA IF NOT EXISTS auth</sql>
+    </changeSet>
+
     <include file="db/changelog/v1.0/01_create_users_table.xml"/>
     <include file="db/changelog/v1.0/02_create_refresh_tokens_table.xml"/>
 

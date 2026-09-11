@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Component
 public class UserEventPublisher {
@@ -23,25 +24,27 @@ public class UserEventPublisher {
         UserRegisteredEvent event = new UserRegisteredEvent(
                 UUID.randomUUID().toString(), userId, email, fullName, Instant.now());
         try {
-            var future = kafkaTemplate.send("auth.user.registered", String.valueOf(userId), event);
-            var result = future.get(10, java.util.concurrent.TimeUnit.SECONDS);
-            log.info("Published auth.user.registered for user {}: {}", userId, result.getRecordMetadata());
+            kafkaTemplate.send("auth.user.registered", String.valueOf(userId), event)
+                    .whenComplete((result, ex) -> {
+                        if (ex != null) {
+                            log.error("Failed to publish auth.user.registered for user {}: {}", userId, ex.getMessage(), ex);
+                        } else {
+                            log.info("Published auth.user.registered for user {}", userId);
+                        }
+                    });
         } catch (Exception ex) {
             log.error("Failed to publish auth.user.registered for user {}: {}", userId, ex.getMessage(), ex);
-            throw new RuntimeException("Failed to publish user registered event", ex);
+            // Don't throw - don't fail the registration if event publishing fails
         }
     }
 
     public void publishUserUpdated(Long userId, String email, String fullName) {
         UserUpdatedEvent event = new UserUpdatedEvent(
                 UUID.randomUUID().toString(), userId, email, fullName, Instant.now());
-        try {
-            var future = kafkaTemplate.send("auth.user.updated", String.valueOf(userId), event);
-            var result = future.get(10, java.util.concurrent.TimeUnit.SECONDS);
-            log.info("Published auth.user.updated for user {}", userId);
-        } catch (Exception ex) {
-            log.error("Failed to publish auth.user.updated for user {}: {}", userId, ex.getMessage(), ex);
-            throw new RuntimeException("Failed to publish user updated event", ex);
-        }
+        kafkaTemplate.send("auth.user.updated", String.valueOf(userId), event)
+                .whenComplete((result, ex) -> {
+                    if (ex != null) log.error("Failed to publish auth.user.updated for user {}: {}", userId, ex.getMessage(), ex);
+                    else log.info("Published auth.user.updated for user {}", userId);
+                });
     }
 }

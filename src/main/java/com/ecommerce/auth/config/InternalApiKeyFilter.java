@@ -17,8 +17,11 @@ import java.util.Collections;
 @Component
 public class InternalApiKeyFilter extends OncePerRequestFilter {
 
-    @Value("${app.internal.api-key}")
-    private String internalApiKey;
+    private final String internalApiKey;
+
+    public InternalApiKeyFilter(@Value("${app.internal.api-key}") String internalApiKey) {
+        this.internalApiKey = internalApiKey;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
